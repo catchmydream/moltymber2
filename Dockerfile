@@ -9,10 +9,14 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir flask==3.0.0
 
 COPY . .
 
-RUN mkdir -p logs
+RUN mkdir -p logs data && chmod +x start.sh
 
-# Jalankan multi-agent launcher (5 agent, 1 service)
-CMD ["python", "main_multi.py"]
+# Expose dashboard port
+EXPOSE 8080
+
+# Jalankan bot + dashboard sekaligus
+CMD ["bash", "start.sh"]
