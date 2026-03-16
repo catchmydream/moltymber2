@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Molty Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&display=swap');
+
+:root{
+  --bg:#09090f;--surface:#111118;--surface2:#18181f;--border:#222230;
+  --purple:#a78bfa;--green:#34d399;--red:#f87171;--amber:#fbbf24;--blue:#60a5fa;
+  --text:#e2e8f0;--muted:#64748b;--dim:#2a2a3a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;
+  font-size:13px;min-height:100vh;padding-bottom:40px}
+
+/* Header */
+.header{padding:16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:var(--bg);z-index:10}
+.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
+  color:var(--purple);letter-spacing:-1px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);
+  display:inline-block;margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.last-update{color:var(--muted);font-size:10px}
+
+/* Summary bar */
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;text-align:center}
+.sum-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--purple)}
+.sum-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+/* Agent cards */
+.section-title{padding:8px 16px 4px;font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:2px}
+.agents{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+
+.agent-card{background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;transition:border .2s}
+.agent-card.active{border-color:var(--dim)}
+.agent-card.inactive{opacity:.5}
+
+.agent-head{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;cursor:pointer}
+.agent-left{display:flex;align-items:center;gap:10px}
+.agent-num{width:32px;height:32px;border-radius:8px;display:flex;
+  align-items:center;justify-content:center;font-weight:700;font-size:14px;
+  font-family:'Syne',sans-serif}
+.n1{background:#4c1d95;color:#a78bfa}
+.n2{background:#14532d;color:#34d399}
+.n3{background:#7c2d12;color:#fb923c}
+.n4{background:#1e3a5f;color:#60a5fa}
+.n5{background:#4a1942;color:#e879f9}
+
+.agent-name{font-weight:600;font-size:13px}
+.agent-key{font-size:10px;color:var(--muted);margin-top:1px}
+.agent-badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600}
+.badge-ok{background:#14532d33;color:var(--green);border:1px solid #14532d}
+.badge-off{background:#1c1c1c;color:var(--muted);border:1px solid var(--dim)}
+.badge-win{background:#4c1d9533;color:var(--purple);border:1px solid #4c1d95}
+
+/* Stats row */
+.agent-stats{display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:var(--border);border-top:1px solid var(--border)}
+.stat{background:var(--surface2);padding:8px 4px;text-align:center}
+.stat-val{font-size:15px;font-weight:700;color:var(--text)}
+.stat-val.green{color:var(--green)}
+.stat-val.amber{color:var(--amber)}
+.stat-val.red{color:var(--red)}
+.stat-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;margin-top:2px}
+
+/* Recent games */
+.agent-detail{display:none;padding:12px 14px;border-top:1px solid var(--border)}
+.agent-detail.open{display:block}
+.detail-title{font-size:9px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:1.5px;margin-bottom:8px}
+.games-list{display:flex;flex-direction:column;gap:4px}
+.game-row{display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface2);border-radius:6px;padding:6px 10px}
+.game-rank{font-size:11px;font-weight:600}
+.rank-1{color:var(--amber)}
+.rank-top{color:var(--green)}
+.rank-mid{color:var(--blue)}
+.rank-low{color:var(--muted)}
+.game-meta{font-size:10px;color:var(--muted);display:flex;gap:8px}
+.game-kills{color:var(--red)}
+.game-moltz{color:var(--amber)}
+
+/* Weights bar */
+.weights{margin-top:10px}
+.weight-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.weight-name{font-size:9px;color:var(--muted);width:80px;flex-shrink:0}
+.weight-bar-bg{flex:1;background:var(--dim);border-radius:3px;height:5px}
+.weight-bar-fill{height:5px;border-radius:3px;background:var(--purple);transition:width .5s}
+.weight-val{font-size:9px;color:var(--purple);width:30px;text-align:right}
+
+/* Refresh button */
+.fab{position:fixed;bottom:20px;right:20px;width:48px;height:48px;
+  border-radius:50%;background:var(--purple);border:none;color:#0a0a0f;
+  font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px #a78bfa44;transition:transform .2s}
+.fab:active{transform:scale(.9)}
+
+/* Loading */
+.loading{text-align:center;padding:40px;color:var(--muted)}
+
+/* No data */
+.no-data{font-size:10px;color:var(--muted);text-align:center;padding:12px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">⚔ MOLTY</div>
+  <div>
+    <span class="status-dot" id="dot"></span>
+    <span class="last-update" id="last-update">memuat...</span>
+  </div>
+</div>
+
+<div id="summary" class="summary">
+  <div class="sum-card"><div class="sum-val" id="s-games">—</div><div class="sum-lbl">Total Games</div></div>
+  <div class="sum-card"><div class="sum-val" id="s-wr">—</div><div class="sum-lbl">Win Rate</div></div>
+  <div class="sum-card"><div class="sum-val" id="s-moltz">—</div><div class="sum-lbl">$Moltz</div></div>
+</div>
+
+<div class="section-title">Agent Status</div>
+<div class="agents" id="agents"><div class="loading">Memuat data...</div></div>
+
+<button class="fab" onclick="refresh()" title="Refresh">↻</button>
+
+<script>
+const PW = new URLSearchParams(location.search).get('pw') ||
+  document.cookie.split(';').find(c=>c.trim().startsWith('pw='))?.split('=')[1] || '{{ pw }}';
+
+const NUM_COLORS = ['n1','n2','n3','n4','n5'];
+
+function wr_color(wr){
+  if(wr>=50) return 'green';
+  if(wr>=30) return 'amber';
+  return 'red';
+}
+
+function rank_class(rank){
+  if(rank===1) return 'rank-1';
+  if(rank<=5)  return 'rank-top';
+  if(rank<=10) return 'rank-mid';
+  return 'rank-low';
+}
+
+function fmt_time(ts){
+  if(!ts) return '';
+  const d = new Date(typeof ts==='string'?ts:ts*1000);
+  return d.toLocaleDateString('id',{day:'2-digit',month:'short'});
+}
+
+function render(data){
+  const {agents, summary} = data;
+
+  // Summary
+  document.getElementById('s-games').textContent = summary.total_games;
+  document.getElementById('s-wr').textContent    = summary.avg_win_rate+'%';
+  document.getElementById('s-moltz').textContent = summary.total_moltz.toLocaleString();
+
+  // Agents
+  const cont = document.getElementById('agents');
+  cont.innerHTML = agents.map((a,i) => {
+    const s = a.stats;
+    const nc = NUM_COLORS[i] || 'n1';
+    const isActive = a.active;
+    const wrc = wr_color(s.win_rate);
+
+    // Recent games list
+    const gamesHtml = a.recent_games.length ? a.recent_games.map(g => `
+      <div class="game-row">
+        <span class="game-rank ${rank_class(g.final_rank||99)}">
+          ${g.is_winner ? '🏆' : '#'+(g.final_rank||'?')}
+        </span>
+        <span class="game-meta">
+          <span class="game-kills">⚔${g.kills||0}</span>
+          <span class="game-moltz">$${g.moltz_earned||0}</span>
+          <span>${fmt_time(g.ended_at||g.started_at)}</span>
+        </span>
+      </div>`).join('') : '<div class="no-data">Belum ada game</div>';
+
+    // Weights
+    const w = a.weights;
+    const weightsHtml = Object.keys(w).length ? `
+      <div class="weights">
+        <div class="detail-title">Strategy Weights (ML)</div>
+        ${[
+          ['Attack/Evade', w.attack_vs_evade||0.6],
+          ['Heal Thresh',  w.heal_threshold||0.3],
+          ['Attack Thresh',w.attack_threshold||0.65],
+          ['Flee Thresh',  w.flee_when_losing||0.7],
+        ].map(([n,v])=>`
+          <div class="weight-row">
+            <span class="weight-name">${n}</span>
+            <div class="weight-bar-bg">
+              <div class="weight-bar-fill" style="width:${Math.round(v*100)}%"></div>
+            </div>
+            <span class="weight-val">${(v*100).toFixed(0)}%</span>
+          </div>`).join('')}
+      </div>` : '';
+
+    return `
+    <div class="agent-card ${isActive?'active':'inactive'}" id="card-${a.index}">
+      <div class="agent-head" onclick="toggle(${a.index})">
+        <div class="agent-left">
+          <div class="agent-num ${nc}">${a.index}</div>
+          <div>
+            <div class="agent-name">${a.name}</div>
+            <div class="agent-key">${a.key_display}</div>
+          </div>
+        </div>
+        <div>
+          ${s.win_rate>=50 ? '<span class="agent-badge badge-win">TOP</span>' :
+            isActive ? '<span class="agent-badge badge-ok">AKTIF</span>' :
+            '<span class="agent-badge badge-off">OFF</span>'}
+        </div>
+      </div>
+      <div class="agent-stats">
+        <div class="stat">
+          <div class="stat-val">${s.total_games}</div>
+          <div class="stat-lbl">Games</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val ${wrc}">${s.win_rate}%</div>
+          <div class="stat-lbl">Win Rate</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val red">${s.total_kills}</div>
+          <div class="stat-lbl">Kills</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val amber">${s.total_moltz}</div>
+          <div class="stat-lbl">$Moltz</div>
+        </div>
+      </div>
+      <div class="agent-detail" id="detail-${a.index}">
+        <div class="detail-title">10 Game Terakhir</div>
+        <div class="games-list">${gamesHtml}</div>
+        ${weightsHtml}
+        <div style="margin-top:8px;font-size:9px;color:var(--muted)">
+          Wallet: ${a.wallet_display} &nbsp;|&nbsp; Combat WR: ${s.combat_wr}%
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Update time
+  const now = new Date();
+  document.getElementById('last-update').textContent =
+    now.toLocaleTimeString('id',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+function toggle(idx){
+  const el = document.getElementById(`detail-${idx}`);
+  el.classList.toggle('open');
+}
+
+async function refresh(){
+  try{
+    const url = `/api/agents?pw=${PW}`;
+    const r   = await fetch(url);
+    if(r.status===401){ location.href='/login'; return; }
+    const data = await r.json();
+    render(data);
+    document.getElementById('dot').style.background = 'var(--green)';
+  } catch(e){
+    document.getElementById('dot').style.background = 'var(--red)';
+    console.error(e);
+  }
+}
+
+// Auto-refresh setiap 30 detik
+refresh();
+setInterval(refresh, 30000);
+</script>
+</body>
+</html>
