@@ -13,10 +13,6 @@ RUN pip install --no-cache-dir flask==3.0.0
 
 COPY . .
 
-RUN mkdir -p logs data && chmod +x start.sh
+RUN mkdir -p logs data
 
-# Expose dashboard port
-EXPOSE 8080
-
-# Jalankan bot + dashboard sekaligus
 CMD ["bash", "start.sh"]
