@@ -6,279 +6,454 @@
 <title>Molty Dashboard</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&display=swap');
-
 :root{
-  --bg:#09090f;--surface:#111118;--surface2:#18181f;--border:#222230;
+  --bg:#09090f;--s1:#111118;--s2:#16161e;--s3:#1e1e28;--bd:#222232;
   --purple:#a78bfa;--green:#34d399;--red:#f87171;--amber:#fbbf24;--blue:#60a5fa;
-  --text:#e2e8f0;--muted:#64748b;--dim:#2a2a3a;
+  --orange:#fb923c;--pink:#e879f9;--text:#e2e8f0;--muted:#64748b;--dim:#2a2a3a;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;
-  font-size:13px;min-height:100vh;padding-bottom:40px}
+  font-size:13px;min-height:100vh;padding-bottom:60px}
 
 /* Header */
-.header{padding:16px;border-bottom:1px solid var(--border);
+.hdr{padding:14px 16px;border-bottom:1px solid var(--bd);
   display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;background:var(--bg);z-index:10}
-.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;
-  color:var(--purple);letter-spacing:-1px}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);
-  display:inline-block;margin-right:6px;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.last-update{color:var(--muted);font-size:10px}
+  position:sticky;top:0;background:var(--bg);z-index:20}
+.logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--purple)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+  animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.upd{font-size:10px;color:var(--muted)}
 
-/* Summary bar */
-.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px}
-.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
-  padding:10px 12px;text-align:center}
-.sum-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--purple)}
-.sum-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+/* Tabs */
+.tabs{display:flex;border-bottom:1px solid var(--bd);background:var(--bg);
+  position:sticky;top:49px;z-index:19}
+.tab{flex:1;padding:10px;text-align:center;font-size:11px;color:var(--muted);
+  cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;
+  text-transform:uppercase;letter-spacing:1px}
+.tab.on{color:var(--purple);border-bottom-color:var(--purple)}
+
+/* Summary */
+.sumbar{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px 12px}
+.sc{background:var(--s1);border:1px solid var(--bd);border-radius:10px;
+  padding:8px 6px;text-align:center}
+.sv{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--purple)}
+.sl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+
+/* Page */
+.page{display:none;padding:0 12px}
+.page.on{display:block}
 
 /* Agent cards */
-.section-title{padding:8px 16px 4px;font-size:10px;color:var(--muted);
-  text-transform:uppercase;letter-spacing:2px}
-.agents{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.acard{background:var(--s1);border:1px solid var(--bd);border-radius:12px;
+  margin-bottom:10px;overflow:hidden}
+.ahead{display:flex;align-items:center;justify-content:space-between;
+  padding:11px 13px;cursor:pointer}
+.aleft{display:flex;align-items:center;gap:9px}
+.anum{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;
+  justify-content:center;font-weight:700;font-size:13px;font-family:'Syne',sans-serif;flex-shrink:0}
+.c1{background:#2d1b69;color:#a78bfa}.c2{background:#064e3b;color:#34d399}
+.c3{background:#431407;color:#fb923c}.c4{background:#1e3a5f;color:#60a5fa}
+.c5{background:#4a044e;color:#e879f9}
+.aname{font-weight:600;font-size:12px}
+.akey{font-size:9px;color:var(--muted);margin-top:1px}
+.abadge{font-size:9px;padding:3px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
+.b-alive{background:#06401533;color:var(--green);border:1px solid #065f46}
+.b-dead{background:#3b000033;color:var(--red);border:1px solid #7f1d1d}
+.b-wait{background:#1e3a5f33;color:var(--blue);border:1px solid #1e40af}
+.b-off{background:#1c1c2433;color:var(--muted);border:1px solid var(--dim)}
 
-.agent-card{background:var(--surface);border:1px solid var(--border);
-  border-radius:12px;overflow:hidden;transition:border .2s}
-.agent-card.active{border-color:var(--dim)}
-.agent-card.inactive{opacity:.5}
+/* Character panel */
+.charpanel{border-top:1px solid var(--bd);background:var(--s2);padding:12px 13px}
+.cp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cp-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:800}
+.cp-loc{font-size:10px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:5px}
+.dz-tag{background:#7f1d1d;color:var(--red);font-size:8px;padding:1px 5px;border-radius:3px}
 
-.agent-head{display:flex;align-items:center;justify-content:space-between;
-  padding:12px 14px;cursor:pointer}
-.agent-left{display:flex;align-items:center;gap:10px}
-.agent-num{width:32px;height:32px;border-radius:8px;display:flex;
-  align-items:center;justify-content:center;font-weight:700;font-size:14px;
-  font-family:'Syne',sans-serif}
-.n1{background:#4c1d95;color:#a78bfa}
-.n2{background:#14532d;color:#34d399}
-.n3{background:#7c2d12;color:#fb923c}
-.n4{background:#1e3a5f;color:#60a5fa}
-.n5{background:#4a1942;color:#e879f9}
+/* HP/EP bars */
+.bars{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.bar-row{display:flex;align-items:center;gap:7px}
+.bar-lbl{font-size:9px;color:var(--muted);width:18px}
+.bar-bg{flex:1;background:var(--dim);border-radius:3px;height:6px;overflow:hidden}
+.bar-fill{height:6px;border-radius:3px;transition:width .5s}
+.bar-hp{background:var(--green)}
+.bar-hp.mid{background:var(--amber)}
+.bar-hp.low{background:var(--red)}
+.bar-ep{background:var(--blue)}
+.bar-val{font-size:10px;font-weight:600;width:30px;text-align:right}
 
-.agent-name{font-weight:600;font-size:13px}
-.agent-key{font-size:10px;color:var(--muted);margin-top:1px}
-.agent-badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600}
-.badge-ok{background:#14532d33;color:var(--green);border:1px solid #14532d}
-.badge-off{background:#1c1c1c;color:var(--muted);border:1px solid var(--dim)}
-.badge-win{background:#4c1d9533;color:var(--purple);border:1px solid #4c1d95}
+/* Stats grid */
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--bd);border-radius:8px;overflow:hidden;margin-bottom:10px}
+.sg{background:var(--s3);padding:7px 4px;text-align:center}
+.sg-v{font-size:14px;font-weight:700}
+.sg-l{font-size:8px;color:var(--muted);text-transform:uppercase;margin-top:1px}
+.green{color:var(--green)}.red{color:var(--red)}
+.amber{color:var(--amber)}.blue{color:var(--blue)}
 
-/* Stats row */
-.agent-stats{display:grid;grid-template-columns:repeat(4,1fr);
-  gap:1px;background:var(--border);border-top:1px solid var(--border)}
-.stat{background:var(--surface2);padding:8px 4px;text-align:center}
-.stat-val{font-size:15px;font-weight:700;color:var(--text)}
-.stat-val.green{color:var(--green)}
-.stat-val.amber{color:var(--amber)}
-.stat-val.red{color:var(--red)}
-.stat-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.5px;margin-top:2px}
+/* Inventory */
+.inv-title{font-size:9px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:5px}
+.inv-grid{display:flex;flex-wrap:wrap;gap:4px}
+.inv-item{background:var(--s3);border:1px solid var(--bd);border-radius:5px;
+  padding:3px 7px;font-size:10px;display:flex;align-items:center;gap:4px}
+.inv-weapon{border-color:#4c1d95;color:var(--purple)}
+.inv-recovery{border-color:#064e3b;color:var(--green)}
+.inv-currency{border-color:#78350f;color:var(--amber)}
+.inv-empty{color:var(--muted);font-size:10px}
+
+/* Career row */
+.career{display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--bd);border-top:1px solid var(--bd)}
+.cr{background:var(--s1);padding:8px 6px;text-align:center}
+.cr-v{font-size:13px;font-weight:700;color:var(--purple)}
+.cr-l{font-size:8px;color:var(--muted);text-transform:uppercase;margin-top:1px}
 
 /* Recent games */
-.agent-detail{display:none;padding:12px 14px;border-top:1px solid var(--border)}
-.agent-detail.open{display:block}
-.detail-title{font-size:9px;color:var(--muted);text-transform:uppercase;
-  letter-spacing:1.5px;margin-bottom:8px}
-.games-list{display:flex;flex-direction:column;gap:4px}
-.game-row{display:flex;align-items:center;justify-content:space-between;
-  background:var(--surface2);border-radius:6px;padding:6px 10px}
-.game-rank{font-size:11px;font-weight:600}
-.rank-1{color:var(--amber)}
-.rank-top{color:var(--green)}
-.rank-mid{color:var(--blue)}
-.rank-low{color:var(--muted)}
-.game-meta{font-size:10px;color:var(--muted);display:flex;gap:8px}
-.game-kills{color:var(--red)}
-.game-moltz{color:var(--amber)}
+.detail{display:none;padding:10px 13px;border-top:1px solid var(--bd)}
+.detail.on{display:block}
+.dt{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.grow{display:flex;align-items:center;justify-content:space-between;
+  background:var(--s2);border-radius:6px;padding:5px 9px;margin-bottom:3px}
+.grk{font-size:11px;font-weight:600}
+.rk1{color:var(--amber)}.rktop{color:var(--green)}.rkmid{color:var(--blue)}.rklow{color:var(--muted)}
+.gmeta{font-size:10px;color:var(--muted);display:flex;gap:8px}
 
-/* Weights bar */
-.weights{margin-top:10px}
-.weight-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.weight-name{font-size:9px;color:var(--muted);width:80px;flex-shrink:0}
-.weight-bar-bg{flex:1;background:var(--dim);border-radius:3px;height:5px}
-.weight-bar-fill{height:5px;border-radius:3px;background:var(--purple);transition:width .5s}
-.weight-val{font-size:9px;color:var(--purple);width:30px;text-align:right}
+/* Rooms tab */
+.room-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;
+  margin-bottom:10px;overflow:hidden}
+.room-head{padding:12px 14px;border-bottom:1px solid var(--bd)}
+.room-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;
+  display:flex;align-items:center;justify-content:space-between}
+.room-id{font-size:9px;color:var(--muted);margin-top:2px}
+.rbadge{font-size:9px;padding:2px 8px;border-radius:20px;font-weight:600}
+.rb-run{background:#06401533;color:var(--green);border:1px solid #065f46}
+.rb-wait{background:#1e3a5f33;color:var(--blue);border:1px solid #1e40af}
+.room-agents{padding:10px 14px}
+.ra-title{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.ra-row{display:flex;align-items:center;justify-content:space-between;
+  background:var(--s2);border-radius:6px;padding:6px 10px;margin-bottom:3px}
+.ra-name{font-size:11px;font-weight:600}
+.ra-stats{font-size:10px;color:var(--muted);display:flex;gap:8px}
+.ra-hp-bar{width:50px;background:var(--dim);border-radius:2px;height:3px;margin-top:3px}
+.ra-hp-fill{height:3px;border-radius:2px;background:var(--green)}
+.no-rooms{text-align:center;padding:30px;color:var(--muted);font-size:12px}
 
-/* Refresh button */
-.fab{position:fixed;bottom:20px;right:20px;width:48px;height:48px;
-  border-radius:50%;background:var(--purple);border:none;color:#0a0a0f;
-  font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 20px #a78bfa44;transition:transform .2s}
+/* Fab */
+.fab{position:fixed;bottom:16px;right:16px;width:44px;height:44px;
+  border-radius:50%;background:var(--purple);border:none;color:#09090f;
+  font-size:18px;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;box-shadow:0 4px 20px #a78bfa33;z-index:99}
 .fab:active{transform:scale(.9)}
 
-/* Loading */
-.loading{text-align:center;padding:40px;color:var(--muted)}
-
-/* No data */
-.no-data{font-size:10px;color:var(--muted);text-align:center;padding:12px}
+.loading{text-align:center;padding:30px;color:var(--muted)}
+.err-card{background:#1c0a0a;border:1px solid #7f1d1d;border-radius:10px;
+  padding:10px 13px;margin-bottom:8px;font-size:11px;color:var(--red)}
 </style>
 </head>
 <body>
 
-<div class="header">
+<div class="hdr">
   <div class="logo">⚔ MOLTY</div>
-  <div>
-    <span class="status-dot" id="dot"></span>
-    <span class="last-update" id="last-update">memuat...</span>
+  <div class="hdr-right">
+    <span class="dot" id="dot"></span>
+    <span class="upd" id="upd">memuat...</span>
   </div>
 </div>
 
-<div id="summary" class="summary">
-  <div class="sum-card"><div class="sum-val" id="s-games">—</div><div class="sum-lbl">Total Games</div></div>
-  <div class="sum-card"><div class="sum-val" id="s-wr">—</div><div class="sum-lbl">Win Rate</div></div>
-  <div class="sum-card"><div class="sum-val" id="s-moltz">—</div><div class="sum-lbl">$Moltz</div></div>
+<!-- Summary bar -->
+<div class="sumbar">
+  <div class="sc"><div class="sv" id="s-agents">—</div><div class="sl">Agents</div></div>
+  <div class="sc"><div class="sv" id="s-ingame">—</div><div class="sl">In Game</div></div>
+  <div class="sc"><div class="sv" id="s-wr">—</div><div class="sl">Win Rate</div></div>
+  <div class="sc"><div class="sv" id="s-games">—</div><div class="sl">Games</div></div>
+  <div class="sc"><div class="sv" id="s-moltz">—</div><div class="sl">$Moltz</div></div>
 </div>
 
-<div class="section-title">Agent Status</div>
-<div class="agents" id="agents"><div class="loading">Memuat data...</div></div>
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab on" id="tab-agents" onclick="switchTab('agents')">Agents</div>
+  <div class="tab" id="tab-rooms" onclick="switchTab('rooms')">Game Rooms</div>
+</div>
 
-<button class="fab" onclick="refresh()" title="Refresh">↻</button>
+<!-- Agents page -->
+<div class="page on" id="page-agents">
+  <div style="height:10px"></div>
+  <div id="agents-list"><div class="loading">Memuat data live...</div></div>
+</div>
+
+<!-- Rooms page -->
+<div class="page" id="page-rooms">
+  <div style="height:10px"></div>
+  <div id="rooms-list"><div class="loading">Memuat rooms...</div></div>
+</div>
+
+<button class="fab" onclick="refresh()">↻</button>
 
 <script>
 const PW = new URLSearchParams(location.search).get('pw') ||
   document.cookie.split(';').find(c=>c.trim().startsWith('pw='))?.split('=')[1] || '{{ pw }}';
 
-const NUM_COLORS = ['n1','n2','n3','n4','n5'];
+let currentTab = 'agents';
+let expandedAgents = new Set();
 
-function wr_color(wr){
-  if(wr>=50) return 'green';
-  if(wr>=30) return 'amber';
-  return 'red';
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('tab-'+tab).classList.add('on');
+  document.getElementById('page-'+tab).classList.add('on');
 }
 
-function rank_class(rank){
-  if(rank===1) return 'rank-1';
-  if(rank<=5)  return 'rank-top';
-  if(rank<=10) return 'rank-mid';
-  return 'rank-low';
+function toggleDetail(idx){
+  expandedAgents.has(idx) ? expandedAgents.delete(idx) : expandedAgents.add(idx);
+  const el = document.getElementById('detail-'+idx);
+  if(el) el.classList.toggle('on');
 }
 
-function fmt_time(ts){
+function hpClass(hp){ return hp<25?'low':hp<50?'mid':''; }
+function rkClass(r){ return r===1?'rk1':r<=5?'rktop':r<=10?'rkmid':'rklow'; }
+function fmtDate(ts){
   if(!ts) return '';
   const d = new Date(typeof ts==='string'?ts:ts*1000);
   return d.toLocaleDateString('id',{day:'2-digit',month:'short'});
 }
 
-function render(data){
-  const {agents, summary} = data;
+function itemCategory(item){
+  const tid = (item.typeId||'').toLowerCase();
+  if(['katana','sword','knife','pistol','sniper','bow'].some(w=>tid.includes(w))) return 'weapon';
+  if(['medkit','bandage','food','energy'].some(w=>tid.includes(w))) return 'recovery';
+  if(item.category==='currency'||tid.includes('reward')) return 'currency';
+  return '';
+}
 
-  // Summary
-  document.getElementById('s-games').textContent = summary.total_games;
-  document.getElementById('s-wr').textContent    = summary.avg_win_rate+'%';
-  document.getElementById('s-moltz').textContent = summary.total_moltz.toLocaleString();
+function itemIcon(item){
+  const tid = (item.typeId||'').toLowerCase();
+  if(tid.includes('katana')) return '⚔';
+  if(tid.includes('sword')) return '🗡';
+  if(tid.includes('knife')) return '🔪';
+  if(tid.includes('pistol')||tid.includes('gun')) return '🔫';
+  if(tid.includes('sniper')) return '🎯';
+  if(tid.includes('bow')) return '🏹';
+  if(tid.includes('medkit')) return '💊';
+  if(tid.includes('bandage')) return '🩹';
+  if(tid.includes('food')) return '🍖';
+  if(tid.includes('energy')) return '⚡';
+  if(tid.includes('reward')||item.category==='currency') return '💰';
+  return '📦';
+}
 
-  // Agents
-  const cont = document.getElementById('agents');
-  cont.innerHTML = agents.map((a,i) => {
-    const s = a.stats;
-    const nc = NUM_COLORS[i] || 'n1';
-    const isActive = a.active;
-    const wrc = wr_color(s.win_rate);
+function renderChar(a){
+  const c = a.character;
+  if(!c) return '';
 
-    // Recent games list
-    const gamesHtml = a.recent_games.length ? a.recent_games.map(g => `
-      <div class="game-row">
-        <span class="game-rank ${rank_class(g.final_rank||99)}">
-          ${g.is_winner ? '🏆' : '#'+(g.final_rank||'?')}
+  const hpPct = Math.max(0,Math.min(100,c.hp));
+  const epPct = Math.max(0,Math.min(100,(c.ep/c.max_ep)*100));
+  const hpCls = hpClass(c.hp);
+
+  // Inventory
+  const inv = (c.inventory||[]);
+  const invHtml = inv.length ? inv.map(item=>{
+    const cat = itemCategory(item);
+    return `<div class="inv-item ${cat?'inv-'+cat:''}">
+      ${itemIcon(item)} <span>${(item.typeId||'?').replace(/_/g,' ')}</span>
+    </div>`;
+  }).join('') : '<span class="inv-empty">Inventory kosong</span>';
+
+  // Status badge
+  const statusBadge = !c.is_alive
+    ? '<span class="abadge b-dead">MATI</span>'
+    : c.game_status==='waiting'
+      ? '<span class="abadge b-wait">WAITING</span>'
+      : '<span class="abadge b-alive">HIDUP</span>';
+
+  const weatherIcon = {clear:'☀',rain:'🌧',fog:'🌫',storm:'⛈'}[c.weather]||'';
+
+  return `
+  <div class="charpanel">
+    <div class="cp-top">
+      <div>
+        <div class="cp-name">${c.name}</div>
+        <div class="cp-loc">
+          📍 ${c.region} ${weatherIcon}
+          ${c.is_dz?'<span class="dz-tag">⚡ DEATH ZONE</span>':''}
+        </div>
+      </div>
+      ${statusBadge}
+    </div>
+    <div class="bars">
+      <div class="bar-row">
+        <span class="bar-lbl">HP</span>
+        <div class="bar-bg"><div class="bar-fill bar-hp ${hpCls}" style="width:${hpPct}%"></div></div>
+        <span class="bar-val ${hpCls==='low'?'red':hpCls==='mid'?'amber':'green'}">${Math.round(c.hp)}</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-lbl">EP</span>
+        <div class="bar-bg"><div class="bar-fill bar-ep" style="width:${epPct}%"></div></div>
+        <span class="bar-val blue">${c.ep}/${c.max_ep}</span>
+      </div>
+    </div>
+    <div class="statgrid">
+      <div class="sg"><div class="sg-v red">${c.atk}</div><div class="sg-l">ATK</div></div>
+      <div class="sg"><div class="sg-v blue">${c.def}</div><div class="sg-l">DEF</div></div>
+      <div class="sg"><div class="sg-v amber">${c.kills}</div><div class="sg-l">Kills</div></div>
+      <div class="sg"><div class="sg-v" style="color:var(--orange);font-size:11px">${(c.weapon||'Fist').replace(/_/g,' ')}</div><div class="sg-l">Weapon</div></div>
+    </div>
+    <div class="inv-title">Inventory (${inv.length})</div>
+    <div class="inv-grid">${invHtml}</div>
+    <div style="margin-top:8px;font-size:9px;color:var(--muted)">
+      👁 ${c.visible_agents} agents &nbsp;|&nbsp; 🐺 ${c.visible_monsters} monsters &nbsp;|&nbsp; 🔗 ${c.connections} exits
+    </div>
+  </div>`;
+}
+
+function renderAgents(agents){
+  const COLORS = ['c1','c2','c3','c4','c5'];
+  return agents.map((a,i)=>{
+    if(a.error && !a.active){
+      return `<div class="err-card">Agent ${a.index}: ${a.error}</div>`;
+    }
+    const s = a.stats||{};
+    const col = COLORS[i%5];
+    const charHtml = renderChar(a);
+    const hasChar = !!a.character;
+
+    // Top badge
+    let badge = '<span class="abadge b-off">OFFLINE</span>';
+    if(a.active && a.character){
+      badge = a.character.is_alive
+        ? '<span class="abadge b-alive">HIDUP</span>'
+        : '<span class="abadge b-dead">MATI</span>';
+    } else if(a.active){
+      badge = '<span class="abadge b-wait">IDLE</span>';
+    }
+
+    // Recent games
+    const games = (a.recent_games||[]).map(g=>`
+      <div class="grow">
+        <span class="grk ${rkClass(g.final_rank||99)}">
+          ${g.is_winner?'🏆':'#'+(g.final_rank||'?')}
         </span>
-        <span class="game-meta">
-          <span class="game-kills">⚔${g.kills||0}</span>
-          <span class="game-moltz">$${g.moltz_earned||0}</span>
-          <span>${fmt_time(g.ended_at||g.started_at)}</span>
+        <span class="gmeta">
+          <span class="red">⚔${g.kills||0}</span>
+          <span class="amber">$${g.moltz_earned||0}</span>
+          <span>${fmtDate(g.ended_at||g.started_at)}</span>
         </span>
-      </div>`).join('') : '<div class="no-data">Belum ada game</div>';
+      </div>`).join('') || '<div style="font-size:10px;color:var(--muted);padding:6px 0">Belum ada game</div>';
 
-    // Weights
-    const w = a.weights;
-    const weightsHtml = Object.keys(w).length ? `
-      <div class="weights">
-        <div class="detail-title">Strategy Weights (ML)</div>
-        ${[
-          ['Attack/Evade', w.attack_vs_evade||0.6],
-          ['Heal Thresh',  w.heal_threshold||0.3],
-          ['Attack Thresh',w.attack_threshold||0.65],
-          ['Flee Thresh',  w.flee_when_losing||0.7],
-        ].map(([n,v])=>`
-          <div class="weight-row">
-            <span class="weight-name">${n}</span>
-            <div class="weight-bar-bg">
-              <div class="weight-bar-fill" style="width:${Math.round(v*100)}%"></div>
-            </div>
-            <span class="weight-val">${(v*100).toFixed(0)}%</span>
-          </div>`).join('')}
-      </div>` : '';
+    const detOpen = expandedAgents.has(a.index) ? 'on' : '';
 
     return `
-    <div class="agent-card ${isActive?'active':'inactive'}" id="card-${a.index}">
-      <div class="agent-head" onclick="toggle(${a.index})">
-        <div class="agent-left">
-          <div class="agent-num ${nc}">${a.index}</div>
+    <div class="acard">
+      <div class="ahead" onclick="toggleDetail(${a.index})">
+        <div class="aleft">
+          <div class="anum ${col}">${a.index}</div>
           <div>
-            <div class="agent-name">${a.name}</div>
-            <div class="agent-key">${a.key_display}</div>
+            <div class="aname">${a.name}</div>
+            <div class="akey">${a.key_display} · $${a.balance||0} Moltz</div>
           </div>
         </div>
-        <div>
-          ${s.win_rate>=50 ? '<span class="agent-badge badge-win">TOP</span>' :
-            isActive ? '<span class="agent-badge badge-ok">AKTIF</span>' :
-            '<span class="agent-badge badge-off">OFF</span>'}
-        </div>
+        ${badge}
       </div>
-      <div class="agent-stats">
-        <div class="stat">
-          <div class="stat-val">${s.total_games}</div>
-          <div class="stat-lbl">Games</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val ${wrc}">${s.win_rate}%</div>
-          <div class="stat-lbl">Win Rate</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val red">${s.total_kills}</div>
-          <div class="stat-lbl">Kills</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val amber">${s.total_moltz}</div>
-          <div class="stat-lbl">$Moltz</div>
-        </div>
+      ${charHtml}
+      <div class="career">
+        <div class="cr"><div class="cr-v">${s.total_games||0}</div><div class="cr-l">Games</div></div>
+        <div class="cr"><div class="cr-v">${s.win_rate||0}%</div><div class="cr-l">Win Rate</div></div>
+        <div class="cr"><div class="cr-v">${s.total_kills||0}</div><div class="cr-l">Kills</div></div>
       </div>
-      <div class="agent-detail" id="detail-${a.index}">
-        <div class="detail-title">10 Game Terakhir</div>
-        <div class="games-list">${gamesHtml}</div>
-        ${weightsHtml}
-        <div style="margin-top:8px;font-size:9px;color:var(--muted)">
-          Wallet: ${a.wallet_display} &nbsp;|&nbsp; Combat WR: ${s.combat_wr}%
-        </div>
+      <div class="detail ${detOpen}" id="detail-${a.index}">
+        <div class="dt">10 Game Terakhir</div>
+        ${games}
       </div>
     </div>`;
   }).join('');
-
-  // Update time
-  const now = new Date();
-  document.getElementById('last-update').textContent =
-    now.toLocaleTimeString('id',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 
-function toggle(idx){
-  const el = document.getElementById(`detail-${idx}`);
-  el.classList.toggle('open');
+function renderRooms(rooms){
+  if(!rooms||!rooms.length){
+    return '<div class="no-rooms">🎮 Tidak ada game room aktif dengan agent kamu saat ini.</div>';
+  }
+  return rooms.map(room=>{
+    const agents = room.agents||room.myAgents||[];
+    const statusBadge = room.status==='running'
+      ? '<span class="rbadge rb-run">RUNNING</span>'
+      : '<span class="rbadge rb-wait">WAITING</span>';
+
+    const agentRows = agents.map(ag=>{
+      const hp = ag.hp||0;
+      const hpPct = Math.max(0,Math.min(100,hp));
+      return `
+      <div class="ra-row">
+        <div>
+          <div class="ra-name">${ag.name||'?'} ${ag.isAlive===false?'💀':''}</div>
+          <div class="ra-hp-bar"><div class="ra-hp-fill" style="width:${hpPct}%"></div></div>
+        </div>
+        <div class="ra-stats">
+          <span class="green">HP:${Math.round(hp)}</span>
+          <span class="blue">EP:${ag.ep||0}</span>
+          <span class="amber">⚔${ag.kills||0}</span>
+        </div>
+      </div>`;
+    }).join('') || '<div style="font-size:10px;color:var(--muted)">Data agent tidak tersedia</div>';
+
+    const mapSize = room.mapSize||room.map_size||'?';
+    const total   = room.currentAgents||room.agentCount||agents.length;
+    const maxAg   = room.maxAgents||'?';
+
+    return `
+    <div class="room-card">
+      <div class="room-head">
+        <div class="room-title">
+          <span>${room.name||'Battle Room'}</span>
+          ${statusBadge}
+        </div>
+        <div class="room-id">
+          ID: ${(room.id||'?').substring(0,16)}... &nbsp;·&nbsp;
+          Map: ${mapSize} &nbsp;·&nbsp;
+          ${total}/${maxAg} agents
+        </div>
+      </div>
+      <div class="room-agents">
+        <div class="ra-title">Agent Kamu di Room Ini</div>
+        ${agentRows}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 async function refresh(){
   try{
-    const url = `/api/agents?pw=${PW}`;
-    const r   = await fetch(url);
+    const r = await fetch(`/api/dashboard?pw=${encodeURIComponent(PW)}`);
     if(r.status===401){ location.href='/login'; return; }
     const data = await r.json();
-    render(data);
+    const {agents, rooms, summary} = data;
+
+    // Summary
+    document.getElementById('s-agents').textContent = summary.total_agents||0;
+    document.getElementById('s-ingame').textContent = summary.in_game||0;
+    document.getElementById('s-wr').textContent     = (summary.avg_win_rate||0)+'%';
+    document.getElementById('s-games').textContent  = summary.total_games||0;
+    document.getElementById('s-moltz').textContent  = summary.total_moltz||0;
+
+    // Agents
+    document.getElementById('agents-list').innerHTML = renderAgents(agents||[]);
+
+    // Rooms
+    document.getElementById('rooms-list').innerHTML = renderRooms(rooms||[]);
+
+    // Status
+    const now = new Date();
+    document.getElementById('upd').textContent =
+      now.toLocaleTimeString('id',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     document.getElementById('dot').style.background = 'var(--green)';
+
   } catch(e){
     document.getElementById('dot').style.background = 'var(--red)';
     console.error(e);
   }
 }
 
-// Auto-refresh setiap 30 detik
 refresh();
 setInterval(refresh, 30000);
 </script>
