@@ -112,7 +112,7 @@ class AgentRunner:
         self.valid      : bool = False
 
         # Validasi API key
-        if not self.api_key or "xxx" in self.api_key:
+        if not self.api_key or len(self.api_key) < 10:
             self.logger.error(f"API_KEY_{index} tidak diset! Agent ini dilewati.")
             return
 
